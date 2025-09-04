@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login & Signup Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
+      background: #f0f4f8;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      width: 350px;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    h2 {
+      margin-bottom: 15px;
+      color: #333;
+    }
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+    .main-btn {
+      width: 95%;
+      background: #4cafef;
+      color: white;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    .main-btn:hover {
+      background: #379adb;
+    }
+    .delete-btn {
+      background: #e74c3c;
+      color: white;
+    }
+    .delete-btn:hover {
+      background: #c0392b;
+    }
+    .toggle {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #555;
+      cursor: pointer;
+    }
+    table {
+      border-collapse: collapse;
+      width: 90%;
+      margin-top: 20px;
+      background: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    th {
+      background: #4cafef;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 id="formTitle">Sign In</h2>
+    <form id="authForm">
+      <input type="text" id="username" placeholder="Username" required><br>
+      <input type="email" id="email" placeholder="Email" required><br>
+      <input type="password" id="password" placeholder="Password" required><br>
+      <button type="submit" id="submitBtn" class="main-btn">Sign In</button>
+    </form>
+    <div class="toggle" onclick="toggleForm()">Don’t have an account? Sign Up</div>
+  </div>
+
+  <table id="userTable">
+    <thead>
+      <tr>
+        <th>Action</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Password</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    let isSignIn = true;
+
+    // Toggle between Sign In and Sign Up
+    function toggleForm() {
+      isSignIn = !isSignIn;
+      document.getElementById("formTitle").innerText = isSignIn ? "Sign In" : "Sign Up";
+      document.getElementById("submitBtn").innerText = isSignIn ? "Sign In" : "Sign Up";
+      document.querySelector(".toggle").innerText =
+        isSignIn ? "Don’t have an account? Sign Up" : "Already have an account? Sign In";
+    }
+
+    // Load saved users from localStorage
+    function loadUsers() {
+      let users = JSON.parse(localStorage.getItem("users")) || [];
+      let tableBody = document.querySelector("#userTable tbody");
+      tableBody.innerHTML = ""; // clear before reloading
+
+      users.forEach((user, index) => {
+        let newRow = tableBody.insertRow();
+
+        let cellAction = newRow.insertCell(0);
+        let cellUser = newRow.insertCell(1);
+        let cellEmail = newRow.insertCell(2);
+        let cellPassword = newRow.insertCell(3);
+        let cellDelete = newRow.insertCell(4);
+
+        cellAction.innerText = user.action;
+        cellUser.innerText = user.username;
+        cellEmail.innerText = user.email;
+        cellPassword.innerText = user.password;
+
+        // Add delete button
+        let deleteBtn = document.createElement("button");
+        deleteBtn.innerText = "Delete";
+        deleteBtn.classList.add("delete-btn");
+        deleteBtn.onclick = () => deleteUser(index);
+        cellDelete.appendChild(deleteBtn);
+      });
+    }
+
+    // Save new user to localStorage
+    document.getElementById("authForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      let username = document.getElementById("username").value;
+      let email = document.getElementById("email").value;
+      let password = document.getElementById("password").value;
+
+      let users = JSON.parse(localStorage.getItem("users")) || [];
+
+      users.push({
+        action: isSignIn ? "Signed In" : "Signed Up",
+        username,
+        email,
+        password
+      });
+
+      localStorage.setItem("users", JSON.stringify(users));
+      loadUsers();
+
+      // Reset form
+      document.getElementById("authForm").reset();
+    });
+
+    // Delete user from localStorage
+    function deleteUser(index) {
+      let users = JSON.parse(localStorage.getItem("users")) || [];
+      users.splice(index, 1); // remove 1 user at that index
+      localStorage.setItem("users", JSON.stringify(users));
+      loadUsers(); // reload table
+    }
+
+    // Load table on page load
+    window.onload = loadUsers;
+  </script>
+</body>
+</html>
